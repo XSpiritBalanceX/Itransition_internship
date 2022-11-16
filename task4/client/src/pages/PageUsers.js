@@ -3,11 +3,30 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Table from 'react-bootstrap/Table';
 import ToggleButton from 'react-bootstrap/ToggleButton';
-import { useState } from "react";
+import { useState , useEffect} from "react";
+import Users from '../components/Users';
 
 const PageUsers =()=>{
 
     const [checked, setChecked]= useState(false);
+    const [dataUser, setDataUser]=useState([]);
+    const [isLoad, setLoad]=useState(false);
+    const [checkCh, setCheckedUser]=useState(false)
+
+    useEffect(()=>{
+      fetch('http://localhost:5000/api/table')
+      .then(res=>res.json())
+      .then(data=>{setLoad(true); setDataUser(data)})
+    },[]);
+
+    
+
+    let users=isLoad?dataUser.map(el=>{
+        return <Users key={el.id} 
+        info={el} 
+        checkedInput={checkCh}
+        setCheckedCh={setCheckedUser}/>
+    }):null;
 
     return(<div>
           <div style={{marginTop:'3%'}}>
@@ -25,7 +44,7 @@ const PageUsers =()=>{
           type="checkbox"
           variant="secondary"
           checked={checked}
-          onChange={(e) => setChecked(e.currentTarget.checked)}
+          onChange={(e) => {setChecked(e.currentTarget.checked);setCheckedUser(e.currentTarget.checked)}}
         >{!checked?'Select All':'Deselect'}</ToggleButton></th>
           <th>id</th>
           <th>Name</th>
@@ -36,15 +55,7 @@ const PageUsers =()=>{
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td><input type={'radio'}/></td>
-          <td>1</td>
-          <td>Mark</td>
-          <td>gfgu@gmail.com</td>
-          <td>01.01.2022</td>
-          <td>01.01.2022</td>
-          <td>Active</td>
-        </tr>
+        {users}
       </tbody>
     </Table>
         </div>

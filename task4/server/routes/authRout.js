@@ -22,7 +22,7 @@ authRouter.post('/registration', async (req, res)=>{
         const hashPassword= await bcrypt.hash(password, 5);
         const user=await User.create({name, email, password:hashPassword});
         const token=generateJwt(user.id,user.email);
-       return res.json({token});
+       return res.json({message:'You have successfully registration!'});
     }catch(e){
         return res.status(500).json({message:'Something went wrong, please try again'});
     }
@@ -40,16 +40,13 @@ authRouter.post('/login', async(req, res)=>{
             return res.status(404).json({message:'Wrong password entered'});
         }
         const token=generateJwt(user.id,user.email)
-        return res.json({token, userId:user.id})
+        return res.json({message:'Successfully'})
     }catch(e){
         return res.status(500).json({message:'Something went wrong, please try again'});
     }  
 });
 
 authRouter.get('/auth', (req, res)=>{
-    if(req.method==='OPTIONS'){
-
-    }
    try{ 
         const token=req.headers.authorization.split(' ')[1];
         if(!token){
@@ -58,7 +55,7 @@ authRouter.get('/auth', (req, res)=>{
         const decoded=jwt.verify(token, process.env.SECRET_KEY);
         req.user=decoded;
         const tokenNew=generateJwt(req.user.id, req.user.email)
-        return res.json({tokenNew});
+        return res.json({message:'true'});
     }catch(e){
         return res.status(401).json({message:'User not authorized'});
     } 
