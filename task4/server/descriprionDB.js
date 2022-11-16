@@ -9,4 +9,4 @@ const User=sequelize.define('user',{
     data_log:{type:DataTypes.STRING}
 });
 
-module.exports={User};
+module.exports=User;
