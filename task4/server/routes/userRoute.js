@@ -1,30 +1,10 @@
 const {Router}=require('express');
 const userRouter=new Router();
 const {User}=require('../descriprionDB');
+const userController=require('../controllers/userController');
 
-userRouter.get('/', async (req, res)=>{
-    try{ 
-        let users=await User.findAll();
-        return res.json(users);
-    }catch(e){
-        return res.status(500).json({message:'Something went wrong, please try again'});
-    }
-});
+userRouter.get('/', userController.getTable);
 
-userRouter.delete('/delete/:id', async (req, res)=>{
-    try{ 
-        const id=parseInt(req.params.id);
-        let userDelete=await User.destroy({where:{id}});  
-        if(userDelete){
-           return res.json({message:`User ${id} was deleted`}); 
-        }  
-        else{
-            return res.json({message:`User ${id} doesn't exist`});
-        }     
-        
-    }catch(e){
-        return res.status(500).json({message:'Something went wrong, please try again'+req.params.id});
-    }
-})
+userRouter.delete('/delete/:id', userController.deleteUser)
 
 module.exports=userRouter;

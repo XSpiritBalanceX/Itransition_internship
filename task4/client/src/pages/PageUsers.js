@@ -19,13 +19,16 @@ const PageUsers =()=>{
       .then(data=>{setLoad(true); setDataUser(data)})
     },[]);
 
-    
+    const selectUser=()=>{
+
+    }
 
     let users=isLoad?dataUser.map(el=>{
         return <Users key={el.id} 
         info={el} 
-        checkedInput={checkCh}
-        setCheckedCh={setCheckedUser}/>
+        checkedInput={checked}
+        setCheckedCh={setCheckedUser}
+        selectUserNow={selectUser}/>
     }):null;
 
     return(<div>
