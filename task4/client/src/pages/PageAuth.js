@@ -5,6 +5,7 @@ import {Button, Modal, Form, Container, Card} from 'react-bootstrap'
 import { login, registration } from "../http/userAPI";
 import { Context } from "../index";
 import {observer} from 'mobx-react-lite';
+import decoded from 'jwt-decode';
 
 const PageAuth =observer(()=>{
 
@@ -26,15 +27,23 @@ const PageAuth =observer(()=>{
   const changeReg=(event)=>{
     setFormReg({...formReg, [event.target.name]:event.target.value})
   }
-  
+
   const click=async()=>{
     try{
       let data;
       if(isLogin){
       data=await login(form.email, form.password);
-      user.setIsAuth(true);
-      setForm({email:'', password:''});
-      navigate('/tableUser');
+      let blockUser=decoded(data.token);
+      if(parseInt(blockUser.id)===parseInt(localStorage.getItem(`blocked ${blockUser.id}`))){
+        user.setIsAuth(false);
+        navigate('/login');
+        setModal('You have been blocked. You cannot enter!')
+        setShow(true);
+      }else{
+        user.setIsAuth(true);
+        navigate('/tableUser');
+      }   
+       setForm({email:'', password:''});  
     }else{
       data=await registration(formReg.nameReg, formReg.emailReg, formReg.passwordReg); 
       setFormReg({nameReg:'', emailReg:'', passwordReg:''});

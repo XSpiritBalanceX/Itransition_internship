@@ -1,44 +1,102 @@
-import React from "react";
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Table from 'react-bootstrap/Table';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import { useState , useEffect} from "react";
+import React, { useState , useEffect, useContext}from "react";
+import {Button,ButtonGroup,Table,ToggleButton, Modal } from 'react-bootstrap';
 import Users from '../components/Users';
+import decoded from 'jwt-decode';
+import {useNavigate} from 'react-router-dom';
+import { Context } from "../index";
+import {observer} from 'mobx-react-lite';
 
 
-const PageUsers =()=>{
+const PageUsers =observer(()=>{
+
+    const {user}=useContext(Context);
 
     const [checked, setChecked]= useState(false);
     const [dataUser, setDataUser]=useState([]);
     const [isLoad, setLoad]=useState(false);
     const [userSel, setUserSelect]=useState(null);
+    const navigate=useNavigate();
+    const [show, setShow] = useState(false);
+    const [modalInfo, setModal]=useState('');
+    const [checUsNow, setChecUsNow]=useState(false);
+    const handleClose = () => setShow(false);
 
     useEffect(()=>{
       fetch('http://localhost:5000/api/table')
       .then(res=>res.json())
-      .then(data=>{setLoad(true); setDataUser(data)})
-      
+      .then(data=>{setLoad(true); setDataUser(data)})      
     },[]);
 
-    const selectUser=(userId)=>{
-      setUserSelect(userId);
+    const [hashUser, setHashUser]=useState({})
+
+    const selectUser=(userId, chec)=>{ 
+      hashUser[userId]=chec;
+      setHashUser(hashUser);
+      setUserSelect(userId) ;
+      setChecUsNow(chec); 
+    }
+    
+    const activUser=decoded(localStorage.getItem('token'));
+
+    const deleteUser=()=>{
+      let newData=dataUser.filter(el=>el.id!==userSel);
+      setDataUser(newData)
+      fetch('http://localhost:5000/api/table/delete/'+userSel,{method:'DELETE',
+      headers: {
+        "Content-Type": "text/plain;charset=UTF-8"
+      }})
+      .then(response=>response.json())
+      .then(data=>{setModal(data.message); setShow(true)})
+      if(userSel===activUser.id){
+        user.setIsAuth(false);
+        navigate('/registration');
+      }
+    }
+    
+    
+    const blockUser=()=>{
+      if(userSel===activUser.id){
+        user.setIsAuth(false);        
+        navigate('/login');
+        localStorage.setItem(`blocked ${userSel}` , userSel);
+      }
+      for(let k in hashUser){
+        if(hashUser[k]===true){
+          localStorage.setItem(`blocked ${k}` , k);
+        }
+      }
+      setChecUsNow(false);
+      setUserSelect(null);   
+    }
+
+    const ublockUser=()=>{
+      for(let k in hashUser){
+        if(hashUser[k]===true){
+          localStorage.removeItem(`blocked ${k}`);
+        }
+      }
+      //localStorage.removeItem(`blocked ${userSel}`);
+      setChecUsNow(false);
+      setUserSelect(null); 
     }
 
     let users=isLoad?dataUser.map(el=>{
         return <Users key={el.id} 
+        activuser={activUser.id}
         info={el} 
         checkedInput={checked}
         selectUserNow={selectUser}
-        isSelected={false}/>
+        isSelected={userSel}
+        checkUserNow={checUsNow}
+        blocked={el.id===parseInt(localStorage.getItem(`blocked ${el.id}`))}/>
     }):null;
 
     return(<div>
           <div style={{marginTop:'3%'}}>
             <ButtonGroup aria-label="Basic example" >
-                <Button variant="secondary" >Block</Button>
-                <Button variant="secondary" >Unblock</Button>
-                <Button variant="secondary" >Delete</Button>
+                <Button variant="secondary" onClick={blockUser}>Block</Button>
+                <Button variant="secondary" onClick={ublockUser}>Unblock</Button>
+                <Button variant="secondary" onClick={deleteUser}>Delete</Button>
             </ButtonGroup>
         </div>  
         <Table striped>
@@ -63,8 +121,17 @@ const PageUsers =()=>{
         {users}
       </tbody>
     </Table>
+
+    <Modal show={show} onHide={handleClose}>
+        <Modal.Body>{modalInfo}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
         </div>
     )
-}
+})
 
 export default PageUsers;

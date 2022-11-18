@@ -1,8 +1,6 @@
 import React, {useContext} from 'react';
-import Container from 'react-bootstrap/Container';
+import {Container,Nav,Navbar } from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
 import { Context } from "../index";
 import {observer} from 'mobx-react-lite'
 import { Button } from 'react-bootstrap';
@@ -13,7 +11,7 @@ const PagesLinks=observer(()=> {
 
   const logOut=()=>{
     user.setIsAuth(false);
-    localStorage.clear()
+    localStorage.setItem('token', null)
     navigate('/')
   }
   const logIn=()=>{

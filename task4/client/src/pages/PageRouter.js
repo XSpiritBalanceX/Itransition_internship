@@ -11,6 +11,7 @@ const PageRouter =()=>{
             <Route path="/" element={<PageAuth/>}/>                        
             <Route path="/login" element={<PageAuth/>}/>
             <Route path="/registration" element={<PageAuth />}/>
+            
             {user.isAuth&& <Route path="/tableUser" element={<PageUsers/>}/>}
             <Route path="*" element={<Navigate to ={'/registration'}/>}/>
         </Routes>
