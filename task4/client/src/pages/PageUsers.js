@@ -6,29 +6,31 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import { useState , useEffect} from "react";
 import Users from '../components/Users';
 
+
 const PageUsers =()=>{
 
     const [checked, setChecked]= useState(false);
     const [dataUser, setDataUser]=useState([]);
     const [isLoad, setLoad]=useState(false);
-    const [checkCh, setCheckedUser]=useState(false)
+    const [userSel, setUserSelect]=useState(null);
 
     useEffect(()=>{
       fetch('http://localhost:5000/api/table')
       .then(res=>res.json())
       .then(data=>{setLoad(true); setDataUser(data)})
+      
     },[]);
 
-    const selectUser=()=>{
-
+    const selectUser=(userId)=>{
+      setUserSelect(userId);
     }
 
     let users=isLoad?dataUser.map(el=>{
         return <Users key={el.id} 
         info={el} 
         checkedInput={checked}
-        setCheckedCh={setCheckedUser}
-        selectUserNow={selectUser}/>
+        selectUserNow={selectUser}
+        isSelected={false}/>
     }):null;
 
     return(<div>
@@ -47,7 +49,7 @@ const PageUsers =()=>{
           type="checkbox"
           variant="secondary"
           checked={checked}
-          onChange={(e) => {setChecked(e.currentTarget.checked);setCheckedUser(e.currentTarget.checked)}}
+          onChange={(e) => setChecked(e.currentTarget.checked)}
         >{!checked?'Select All':'Deselect'}</ToggleButton></th>
           <th>id</th>
           <th>Name</th>

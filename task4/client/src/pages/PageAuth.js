@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useContext} from "react";
+import { useState, useContext, useEffect} from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {Button, Modal, Form, Container, Card} from 'react-bootstrap'
 import { login, registration } from "../http/userAPI";
@@ -10,8 +10,9 @@ const PageAuth =observer(()=>{
 
   const {user}=useContext(Context);
   const location=useLocation();
-  const isLogin=location.pathname==='/login'||'/';
-  const navigate=useNavigate()
+  const isLogin=location.pathname==='/login';
+  const navigate=useNavigate();
+
 
   const [form, setForm]=useState({email:'', password:''});
   const [formReg, setFormReg]=useState({nameReg:'', emailReg:'', passwordReg:''});
@@ -25,26 +26,24 @@ const PageAuth =observer(()=>{
   const changeReg=(event)=>{
     setFormReg({...formReg, [event.target.name]:event.target.value})
   }
-
+  
   const click=async()=>{
     try{
       let data;
       if(isLogin){
       data=await login(form.email, form.password);
-      
+      user.setIsAuth(true);
+      setForm({email:'', password:''});
+      navigate('/tableUser');
     }else{
-      data=await registration(formReg.nameReg, formReg.emailReg, formReg.passwordReg);   
-      
-    }
-    setForm({email:'', password:''})
-    setFormReg({nameReg:'', emailReg:'', passwordReg:''}) 
-    setModal(data.message);
-    setShow(true);
-    user.setIsAuth(true);
-    navigate('/users');
-  }catch(e){
-    setForm({email:'', password:''})
-    setFormReg({nameReg:'', emailReg:'', passwordReg:''})  
+      data=await registration(formReg.nameReg, formReg.emailReg, formReg.passwordReg); 
+      setFormReg({nameReg:'', emailReg:'', passwordReg:''});
+      setModal(data.message);
+      setShow(true);
+      navigate('/login');  
+    }}catch(e){
+      setForm({email:'', password:''})
+      setFormReg({nameReg:'', emailReg:'', passwordReg:''})  
       setModal(e.response.data.message)
       setShow(true);     
     }
