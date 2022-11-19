@@ -5,6 +5,6 @@ const userController=require('../controllers/userController');
 
 userRouter.get('/', userController.getTable);
 
-userRouter.delete('/delete/:id', userController.deleteUser)
+userRouter.put('/delete/', userController.deleteUser)
 
 module.exports=userRouter;

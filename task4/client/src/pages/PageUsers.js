@@ -27,46 +27,75 @@ const PageUsers =observer(()=>{
       .then(data=>{setLoad(true); setDataUser(data)})      
     },[]);
 
-    const [hashUser, setHashUser]=useState({})
-
+    const [hashUser, setHashUser]=useState({});
+    const selectAllUsers={};
+    
     const selectUser=(userId, chec)=>{ 
       hashUser[userId]=chec;
       setHashUser(hashUser);
       setUserSelect(userId) ;
       setChecUsNow(chec); 
     }
-    
+
     const activUser=decoded(localStorage.getItem('token'));
 
     const deleteUser=()=>{
-      let newData=dataUser.filter(el=>el.id!==userSel);
-      setDataUser(newData)
-      fetch('http://localhost:5000/api/table/delete/'+userSel,{method:'DELETE',
+      let deleteUs=null;
+      let newData=[...dataUser];      
+      if(checked){
+        deleteUs=selectAllUsers;        
+      }else{
+        deleteUs=hashUser;        
+      }
+      let arrUserDel=[];
+      for(let k in deleteUs){
+        if(deleteUs[k]===true){
+          console.log(k)
+          newData.forEach((el, ind)=>{if(el.id===parseInt(k)){
+            newData.splice(ind,1)
+            arrUserDel.push(el.id)
+          }})
+        }    
+      }
+      setDataUser(newData);    
+      fetch('http://localhost:5000/api/table/delete/',{method:'PUT',
       headers: {
-        "Content-Type": "text/plain;charset=UTF-8"
-      }})
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        }, body:JSON.stringify({data:arrUserDel})})
       .then(response=>response.json())
-      .then(data=>{setModal(data.message); setShow(true)})
+      .then(data=>{setModal(data.message); setShow(true)});
+      
       if(userSel===activUser.id){
         user.setIsAuth(false);
         navigate('/registration');
       }
     }
-    
-    
-    const blockUser=()=>{
-      if(userSel===activUser.id){
-        user.setIsAuth(false);        
-        navigate('/login');
-        localStorage.setItem(`blocked ${userSel}` , userSel);
-      }
-      for(let k in hashUser){
+
+    const blockUser=()=>{if(checked){
+        for(let k in selectAllUsers){
+          if(selectAllUsers[k]===true){
+            localStorage.setItem(`blocked ${k}` , k);
+          }
+          if(k==activUser.id){
+            user.setIsAuth(false);        
+            navigate('/login');
+          }
+          selectAllUsers[k]=false
+        }
+      }else{
+        for(let k in hashUser){
         if(hashUser[k]===true){
           localStorage.setItem(`blocked ${k}` , k);
         }
+        if(k==activUser.id){
+          user.setIsAuth(false);        
+          navigate('/login');
+        }
+        hashUser[k]=false
       }
-      setChecUsNow(false);
-      setUserSelect(null);   
+      }
+      setChecUsNow(false);  
     }
 
     const ublockUser=()=>{
@@ -74,20 +103,19 @@ const PageUsers =observer(()=>{
         if(hashUser[k]===true){
           localStorage.removeItem(`blocked ${k}`);
         }
+        hashUser[k]=false
       }
-      //localStorage.removeItem(`blocked ${userSel}`);
       setChecUsNow(false);
-      setUserSelect(null); 
     }
-
+    
     let users=isLoad?dataUser.map(el=>{
+      selectAllUsers[el.id]=checked?true:false
         return <Users key={el.id} 
         activuser={activUser.id}
         info={el} 
         checkedInput={checked}
         selectUserNow={selectUser}
-        isSelected={userSel}
-        checkUserNow={checUsNow}
+        valueAllCheck={hashUser}        
         blocked={el.id===parseInt(localStorage.getItem(`blocked ${el.id}`))}/>
     }):null;
 

@@ -34,7 +34,7 @@ const PageAuth =observer(()=>{
       if(isLogin){
       data=await login(form.email, form.password);
       let blockUser=decoded(data.token);
-      if(parseInt(blockUser.id)===parseInt(localStorage.getItem(`blocked ${blockUser.id}`))){
+      if(blockUser.id===parseInt(localStorage.getItem(`blocked ${blockUser.id}`))){
         user.setIsAuth(false);
         navigate('/login');
         setModal('You have been blocked. You cannot enter!')
