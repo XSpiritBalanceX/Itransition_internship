@@ -50,14 +50,6 @@ class AuthController{
        }  
    }
 
-   async check (req, res, next){
-    try{ 
-         const token=generateJwt(req.user.id, req.user.email)
-         return res.json({token});
-     }catch(e){
-        return next(ApiError.forbidden('User not authorized'));
-     } 
- }
 }
 
 module.exports = new AuthController();

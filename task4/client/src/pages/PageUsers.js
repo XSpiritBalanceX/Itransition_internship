@@ -109,7 +109,7 @@ const PageUsers =observer(()=>{
     }
     
     let users=isLoad?dataUser.map(el=>{
-      selectAllUsers[el.id]=checked?true:false
+      selectAllUsers[el.id]=checked?true:false;
         return <Users key={el.id} 
         activuser={activUser.id}
         info={el} 
@@ -117,8 +117,8 @@ const PageUsers =observer(()=>{
         selectUserNow={selectUser}
         valueAllCheck={hashUser}        
         blocked={el.id===parseInt(localStorage.getItem(`blocked ${el.id}`))}/>
-    }):null;
-
+    }).sort((a,b)=>a.key-b.key):null;
+    
     return(<div>
           <div style={{marginTop:'3%'}}>
             <ButtonGroup aria-label="Basic example" >
